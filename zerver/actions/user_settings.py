@@ -143,11 +143,9 @@ def do_change_user_delivery_email(
         event_type=AuditLogEventType.USER_EMAIL_CHANGED,
         event_time=event_time,
         # store the old and new email in the extra_data field
-        extra_data={
-            "old_value": old_email,
-            "new_value": new_email
-        }
+        extra_data={"old_value": old_email, "new_value": new_email},
     )
+
 
 def do_start_email_change_process(user_profile: UserProfile, new_email: str) -> None:
     old_email = user_profile.delivery_email

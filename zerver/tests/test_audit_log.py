@@ -274,6 +274,7 @@ class TestRealmAuditLog(ZulipTestCase):
         )
         # No error should be raised here
         validate_password(password, user)
+
     def test_change_email(self) -> None:
         now = timezone_now()
         user = self.example_user("hamlet")
@@ -292,12 +293,13 @@ class TestRealmAuditLog(ZulipTestCase):
         )
         self.assertTrue(
             repr(audit_entry).startswith(
-            f"<RealmAuditLog: {AuditLogEventType.USER_EMAIL_CHANGED.name} "
+                f"<RealmAuditLog: {AuditLogEventType.USER_EMAIL_CHANGED.name} "
             )
         )
-        # verify the extra_data field 
+        # verify the extra_data field
         self.assertEqual(audit_entry.extra_data["old_value"], old_email)
         self.assertEqual(audit_entry.extra_data["new_value"], new_email)
+
     def test_change_avatar_source(self) -> None:
         now = timezone_now()
         user = self.example_user("hamlet")
