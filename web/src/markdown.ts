@@ -6,6 +6,8 @@ import type {Template} from "url-template";
 
 import * as fenced_code from "../shared/src/fenced_code";
 import marked from "../third/marked/lib/marked";
+import {emojis_by_name} from "./emoji"; // Certifique-se de ajustar o caminho conforme necessário
+
 import type {LinkifierMatch, ParseOptions, RegExpOrStub} from "../third/marked/lib/marked";
 
 // This contains zulip's frontend Markdown implementation; see
@@ -34,6 +36,7 @@ function contains_preview_link(content: string): boolean {
 }
 
 let web_app_helpers: MarkdownHelpers | undefined;
+let isOnlyEmojiMessage = false;
 
 export type AbstractMap<K, V> = {
     keys: () => IterableIterator<K>;
@@ -480,7 +483,9 @@ export function is_status_message(raw_content: string): boolean {
 }
 
 function make_emoji_span(codepoint: string, title: string, alt_text: string): string {
-    return `<span aria-label="${_.escape(title)}" class="emoji emoji-${_.escape(
+    const largeClass = isOnlyEmojiMessage ? " emoji-big" : "";
+    console.log(largeClass)
+    return `<span aria-label="${_.escape(title)}" class="${largeClass}emoji emoji-${_.escape(
         codepoint,
     )}" role="img" title="${_.escape(title)}">${_.escape(alt_text)}</span>`;
 }
@@ -535,7 +540,6 @@ function handleEmoji({
     // span using the spritesheet; and if it isn't one of those
     // either, we pass through the plain text syntax unmodified.
     const emoji_url = get_realm_emoji_url(emoji_name);
-
     if (emoji_url) {
         return `<img alt="${_.escape(alt_text)}" class="emoji" src="${_.escape(
             emoji_url,
@@ -813,7 +817,12 @@ export function render(raw_content: string): {
     content: string;
     flags: string[];
     is_me_message: boolean;
-} {
+} { 
+    // Atualize a variável global com base no resultado da função is_only_emoji
+    isOnlyEmojiMessage = is_only_emoji(raw_content);
+    if(isOnlyEmojiMessage){
+        console.log("is_only_emoji")
+    }
     // This is generally only intended to be called by the web app. Most
     // other platforms should call parse().
     assert(web_app_helpers !== undefined);
@@ -837,4 +846,14 @@ export function parse_non_message(raw_content: string): string {
     // raw_content exactly as if it were a Zulip message, so we will
     // handle things like mentions, stream links, and linkifiers.
     return parse({raw_content, helper_config: web_app_helpers}).content;
+}
+
+
+
+function is_only_emoji(emoji_name: string): boolean {
+    // Define um padrão para detectar mensagens com apenas emojis.
+    const EMOJI_PATTERN = new RegExp(
+        `^(?:\\s*(?:${Array.from(emojis_by_name.keys()).map(emoji => _.escapeRegExp(emoji)).join(":\\s*|\\s*:")}:\\s*)+)$`
+    );
+    return EMOJI_PATTERN.test(emoji_name);
 }
