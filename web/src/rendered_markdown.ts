@@ -21,6 +21,8 @@ import * as timerender from "./timerender";
 import * as user_groups from "./user_groups";
 import {user_settings} from "./user_settings";
 import * as util from "./util";
+import {emojis_by_name} from "./emoji";
+import _ from "lodash";
 
 /*
     rendered_markdown
@@ -86,6 +88,16 @@ function wrap_mention_content_in_dom_element(element: HTMLElement): HTMLElement 
     const mention_text = $(element).text();
     $(element).html(render_mention_content_wrapper({mention_text}));
     return element;
+}
+
+function is_only_emoji(emoji_name: string): boolean {
+    // Define um padrão para detectar mensagens com apenas emojis.
+    const EMOJI_PATTERN = new RegExp(
+        `^(?:\\s*(?:${Array.from(emojis_by_name.keys())
+            .map((emoji) => _.escapeRegExp(emoji))
+            .join(":\\s*|\\s*:")}:\\s*)+)$`,
+    );
+    return EMOJI_PATTERN.test(emoji_name);
 }
 
 // Helper function to update a mentioned user's name.
@@ -346,6 +358,32 @@ export const update_elements = ($content: JQuery): void => {
             });
         });
         $codehilite.addClass("zulip-code-block");
+    });
+
+    $content.each(function () {
+        const $this = $(this); // Current message container
+        const emojis = $this.find(".emoji"); // Find emoji elements
+        const non_emoji_text = $this
+            .clone() // Clone to inspect text
+            .find(".emoji")
+            .remove()
+            .end()
+            .text()
+            .trim(); // Remove emojis and get remaining text
+
+        if (emojis.length > 0 && non_emoji_text === "") {
+            // If message is only emojis
+            document.documentElement.style.setProperty(
+                "--length-emoji-dynamic",
+                "2.5em", // Larger size for single-emoji messages
+            );
+            $this.addClass("only-emoji-message");
+            console.log("addded only-emoji-message in update_element");
+        } else {
+            // Default emoji size for mixed or non-emoji messages
+            document.documentElement.style.setProperty("--length-emoji-dynamic", "1.4286em");
+            $this.removeClass("only-emoji-message");
+        }
     });
 
     // Display emoji (including realm emoji) as text if

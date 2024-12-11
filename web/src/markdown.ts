@@ -483,9 +483,15 @@ export function is_status_message(raw_content: string): boolean {
 }
 
 function make_emoji_span(codepoint: string, title: string, alt_text: string): string {
-    const largeClass = isOnlyEmojiMessage ? " emoji-big" : "";
-    console.log(largeClass)
-    return `<span aria-label="${_.escape(title)}" class="${largeClass}emoji emoji-${_.escape(
+    if (isOnlyEmojiMessage) {
+        console.log("big-emoji");
+
+        return `<span aria-label="${_.escape(title)}" class="only-emoji-message emoji-${_.escape(
+            codepoint,
+        )}" role="img" title="${_.escape(title)}">${_.escape(alt_text)}</span>`;
+    }
+    console.log("passou aqui");
+    return `<span aria-label="${_.escape(title)}" class="emoji emoji-${_.escape(
         codepoint,
     )}" role="img" title="${_.escape(title)}">${_.escape(alt_text)}</span>`;
 }
@@ -548,6 +554,7 @@ function handleEmoji({
 
     const codepoint = get_emoji_codepoint(emoji_name);
     if (codepoint) {
+        console.log("chegou aqui");
         return make_emoji_span(codepoint, title, alt_text);
     }
 
@@ -817,11 +824,11 @@ export function render(raw_content: string): {
     content: string;
     flags: string[];
     is_me_message: boolean;
-} { 
+} {
     // Atualize a variável global com base no resultado da função is_only_emoji
     isOnlyEmojiMessage = is_only_emoji(raw_content);
-    if(isOnlyEmojiMessage){
-        console.log("is_only_emoji")
+    if (isOnlyEmojiMessage) {
+        console.log("is_only_emoji");
     }
     // This is generally only intended to be called by the web app. Most
     // other platforms should call parse().
@@ -848,12 +855,12 @@ export function parse_non_message(raw_content: string): string {
     return parse({raw_content, helper_config: web_app_helpers}).content;
 }
 
-
-
 function is_only_emoji(emoji_name: string): boolean {
     // Define um padrão para detectar mensagens com apenas emojis.
     const EMOJI_PATTERN = new RegExp(
-        `^(?:\\s*(?:${Array.from(emojis_by_name.keys()).map(emoji => _.escapeRegExp(emoji)).join(":\\s*|\\s*:")}:\\s*)+)$`
+        `^(?:\\s*(?:${Array.from(emojis_by_name.keys())
+            .map((emoji) => _.escapeRegExp(emoji))
+            .join(":\\s*|\\s*:")}:\\s*)+)$`,
     );
     return EMOJI_PATTERN.test(emoji_name);
 }

@@ -147,19 +147,17 @@
 
     /* Emoji; sized to be easily understood while not overwhelming text. */
     .emoji {
-        /* The box for emoji is allowed to be larger than the size of the
-           line-height. */
-        height: var(--length-line-oversize-block);
-        width: var(--length-line-oversize-block);
-        /* A negative top and bottom margin adjustment allows emoji
-           to size larger than the size of the line, without disturbing
-           the surrounding lines of text. */
+        height: var(--length-emoji-dynamic, var(--length-emoji-multi-line));
+        width: var(--length-emoji-dynamic, var(--length-emoji-multi-line));
         margin: var(--length-line-oversize-block-margin-adjust) auto;
-        /* We set the alignment programmatically, as an em value.
-           Because the negative margins above are equal, top and bottom,
-           this vertical offset value works without adjustment for
-           oversize emoji blocks. */
         vertical-align: var(--line-fitted-vertical-align-offset-em);
+    }
+
+    .only-emoji-message .emoji {
+        height: var(--length-emoji-big);
+        width: var(--length-emoji-big);
+        margin: 0 auto; /* Center without negative adjustment */
+        vertical-align: middle; /* Adjust alignment */
     }
 
     /* Mentions and alert words */

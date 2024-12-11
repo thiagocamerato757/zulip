@@ -315,6 +315,9 @@
                     ) - var(--length-line-oversize-block)
             ) / 2
     );
+    --length-emoji-single-line: 2.5em; /* Large size for single-emoji messages */
+    --length-emoji-multi-line: 1.4286em; /* Default size for normal messages */
+    --length-emoji-big: 2.5em;
 
     /* Legacy values */
     --legacy-body-line-height-unitless: calc(20 / 14);
